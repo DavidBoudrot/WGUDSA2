@@ -57,6 +57,29 @@ class Package:
         package2Index = int(address_table[package.address])
         return float(list_of_dist[package1Index][package2Index])
 
+    # Here is a lookup method as required by the assignment
+
+    # O(n)
+    def lookup(self):
+        # Open the CSV file with package data
+        with open('data.csv', 'r') as csvfile:
+            packdata = csv.reader(csvfile)
+            # Loop through each row in the CSV file
+            for row in packdata:
+                # If the package ID matches the one we're looking for, return the corresponding data
+                if row[0] == self.package_id:
+                    return {'Package ID': row[0],
+                            'Delivery Address': row[1],
+                            'Delivery City': row[2],
+                            'Delivery Zip Code': row[4],
+                            'Delivery Deadline': row[5],
+                            'Package Weight': row[6],
+                            'Delivery Status': self.delivery_status,
+                            'Delivery Time': self.delivered_time.strftime("%m/%d/%Y %H:%M:%S")}
+
+            #28,2835 Main St,Salt Lake City,UT,84115,EOD,7,Delayed on flight---will not arrive to depot until 9:05 am
+        # If the package ID isn't found in the CSV file, return an error message
+        return "Error: Package ID not found"
 
 
 

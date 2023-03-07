@@ -1,3 +1,4 @@
+import copy
 import heapq
 from datetime import datetime, timedelta
 class SimulationNew:
@@ -81,7 +82,7 @@ class SimulationNew:
         for package in self.all_packages:
 
         # If the user wants to see the status of the packages, they can enter "i" at any time.
-            i = input("Press Enter to continue or enter I for stats...")
+            i = input("Press Enter to continue or enter i for stats...")
             if i == "i":
                 self.lookupStats()
             print(package.package_id + ' delivered at ' + str(package.delivered_time) + ' by truck ' + str(package.truck_id)
@@ -137,8 +138,6 @@ class SimulationNew:
     # The actual time assumes a speed of 18 mph.
     #O(1)
 
-
-
     def increment_truck_time(self, distance, truck):
         speed = 18
         truck.distance += distance
@@ -164,6 +163,7 @@ class SimulationNew:
 
     # This method is used for looking up various stats about the packages.
     # Its a little messy but it works.
+    # I have updated it to include the lookup() function as required by the rubric.
 
     #O(n)
     def lookupStats(self):
@@ -175,7 +175,8 @@ class SimulationNew:
         print("5. Delivery Zip Code")
         print("6. Package Weight")
         print("7. Delivery Status")
-        print("8. Back to Simulation")
+        print("8. Lookup time")
+        print("9. Back to simulation")
         i = input()
         if i == "1":
             search_results = []
@@ -186,6 +187,7 @@ class SimulationNew:
                 if package.package_id == i:
                     search_results.append(package)
                     print("Package found")
+                    print(package.lookup())
                     # print package info here
                     found = True
             if not found and len(search_results) == 0:
@@ -199,7 +201,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "2":
@@ -223,7 +225,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "3":
@@ -248,7 +250,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "4":
@@ -272,7 +274,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "5":
@@ -296,7 +298,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "6":
@@ -322,7 +324,7 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "7":
@@ -346,15 +348,100 @@ class SimulationNew:
                     j += 1
                 print("Enter the number of the package you would like to view")
                 i = input()
-                print(search_results[int(i)])
+                print(search_results[int(i)].lookup())
                 input("Press enter to continue")
                 self.lookupStats()
         elif i == "8":
+            time = input("Please enter a time in the format HH:MM (24 hour time)")
+            try:
+                time = datetime.strptime(time, '%H:%M')
+            except ValueError:
+                print("Invalid time format")
+                input("Press enter to continue")
+                self.lookupStats()
+            self.lookup_time(time)
+
+
+        elif i == "9":
             return
         else:
             print("Invalid input")
             input("Press enter to continue")
             self.lookupStats()
+
+    def lookup_time(self, time):
+        # Take all three trucks and find the package stats at the given time
+        # So I think what will work is sorting all times and delivering them up to the time given.
+        # Then I'll just have to revert back to the previous status.
+
+        # So ill start by saving the current status of all packages
+        saved_packages = copy.deepcopy(self.all_packages)
+
+        # In order to setup the en route status for a lookup I'll have to check which trucks have packages that have been delivered.
+        # You can assume all truck packages are en route once the first one has been delivered.
+
+        truck1_departed = False
+        truck2_departed = False
+        truck3_departed = False
+
+        for package in self.all_packages:
+            if time < package.delivered_time:
+                continue
+            else:
+                if package.truck_id == 1:
+                    truck1_departed = True
+                elif package.truck_id == 2:
+                    truck2_departed = True
+                elif package.truck_id == 3:
+                    truck3_departed = True
+
+        if truck1_departed:
+            for package in self.all_packages:
+                if package.truck_id == 1:
+                    if package.delivered_time <= time:
+                        package.delivery_status = "Delivered"
+                    else:
+                        package.delivery_status = "En route"
+        if truck2_departed:
+            for package in self.all_packages:
+                if package.truck_id == 2:
+                    if package.delivered_time <= time:
+                        package.delivery_status = "Delivered"
+                    else:
+                        package.delivery_status = "En route"
+
+        if truck3_departed:
+            for package in self.all_packages:
+                if package.truck_id == 3:
+                    if package.delivered_time <= time:
+                        package.delivery_status = "Delivered"
+                    else:
+                        package.delivery_status = "En route"
+
+
+        for package in self.all_packages:
+            print("Package ID: " + package.package_id + " Status: " + package.delivery_status)
+        i = input("Enter package id to view details or press enter to continue")
+        if i == "":
+            # Revert back to the saved packages
+            self.all_packages = saved_packages
+            self.lookupStats()
+
+        # Lookup package by id
+        for package in self.all_packages:
+            if package.package_id == i:
+                print(package.lookup())
+                input("Press enter to continue")
+
+        self.all_packages = saved_packages
+
+
+
+
+
+
+
+
 
 
 

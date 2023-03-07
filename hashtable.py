@@ -21,6 +21,9 @@ class HashTable:
     #Big O is O(n)
 
 
+    # Inserting a key value pair into the table
+    # If the key already exists the value will be replaced
+    # That is what the bucket is for
     def insert(self, key, value):
         hash_key = self.hash(key)
         bucket = self.table[hash_key]
@@ -31,6 +34,8 @@ class HashTable:
         bucket.append((key, value))
 
     #Big O is O(n)
+
+    # Goes through the bucket and returns the value
     def lookup(self, key):
         hash_key = self.hash(key)
         bucket = self.table[hash_key]
@@ -40,6 +45,7 @@ class HashTable:
         raise KeyError(key)
 
     #Big O is O(n)
+    # Iterates through the table to check for the value
     def contains(self, address):
         for i in range(len(self.table)):
             if self.table[i] == address:
